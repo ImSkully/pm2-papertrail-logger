@@ -1,9 +1,9 @@
 {
-	"name": "papertrail-logger",
+	"name": "pm2-papertrail-logger",
 	"version": "1.0.0",
 	"author": "ImSkully",
 	"license": "gpl-3.0",
-	"description": "A pm2 module that forwards log outputs to Papertrail.",
+	"description": "A simple and efficient PM2 module that forwards logs to Papertrail.",
 	"main": "index.js",
 	"dependencies": {
 		"@pm2/io": "^5.0.0",
@@ -20,8 +20,7 @@
 	"apps": [
 		{
 			"env": {
-				"PM2_EXTRA_DISPLAY": "true",
-				"max_restarts": 2
+				"PM2_EXTRA_DISPLAY": "true"
 			},
 			"max_memory_restart": "200M",
 			"merge_logs": true,
