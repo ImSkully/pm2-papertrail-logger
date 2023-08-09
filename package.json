@@ -17,6 +17,18 @@
 		"port": "",
 		"hostname": ""
 	},
+	"repository": {
+        "type": "git",
+		"url": "https://github.com/ImSkully/pm2-papertrail-logger.git"
+    },
+	"bugs": {
+        "url": "https://github.com/ImSkully/pm2-papertrail-logger/issues"
+    },
+	"keywords": [
+        "pm2",
+        "pm2-module",
+        "papertrail"
+    ],
 	"apps": [
 		{
 			"env": {
