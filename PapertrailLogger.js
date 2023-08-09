@@ -19,7 +19,7 @@ class PapertrailLogger
 				new (winston.transports.Papertrail)({
 					host: config.host,
 					port: config.port,
-					localhost: config?.hostname.trim() || os.hostname(), // System name to display in Papertrail.
+					localhost: config.hostname, // System name to display in Papertrail.
 					program: this.name, // Program/app name to display in Papertrail.
 					colorize: true,
 					level: "info"
