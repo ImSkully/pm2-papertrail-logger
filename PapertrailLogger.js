@@ -1,4 +1,3 @@
-
 const os = require("os");
 const winston = require("winston");
 require("winston-papertrail").Papertrail;

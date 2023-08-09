@@ -85,7 +85,7 @@ pmx.initModule({
 
 	// Connect to the running pm2 service.
 	pm2.connect(() => {
-		log(`Started and forwarding log outputs to ${PM2_CONFIG.host}:${PM2_CONFIG.port} as '${PM2_CONFIG.hostname.trim() || os.hostname()}'!`);
+		log(`Started and forwarding log outputs to ${PM2_CONFIG.host}:${PM2_CONFIG.port} as '${PM2_CONFIG.hostname || os.hostname()}'!`);
 
 		// Initialize a new pm2 bus to listen for log events.
 		pm2.launchBus(function(error, bus) {

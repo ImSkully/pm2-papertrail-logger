@@ -2,7 +2,7 @@
 	"name": "pm2-papertrail-logger",
 	"version": "1.0.0",
 	"author": "ImSkully",
-	"license": "gpl-3.0",
+	"license": "LGPL-3.0-or-later",
 	"description": "A simple and efficient PM2 module that forwards logs to Papertrail.",
 	"main": "index.js",
 	"dependencies": {
