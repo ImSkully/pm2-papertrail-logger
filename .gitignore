@@ -1,0 +1,6 @@
+# Project Files
+/node_modules/
+/.vscode/
+
+# Environment variables
+.env
