@@ -56,7 +56,7 @@ pm2 set pm2-papertrail-logger:hostname <hostname>
 This module also provides metrics that can be viewed within the PM2 dashboard.
 | Metric | Description |
 | --- | --- |
-| `Attached Processes` | The number of processes that are currently attached to the module. |
+| `Attached Processes` | The number of processes that are currently transporting logs to Papertrail. |
 
 # Uninstalling
 To uninstall the module, simply run:
