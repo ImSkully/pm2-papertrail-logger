@@ -63,7 +63,7 @@ pmx.configureModule({
 // Initialize the pm2 module.
 pmx.initModule({
 	widget: {
-		logo: "https://github.com/ImSkully/pm2-papertrail-logger/blob/main/assets/Papertrail.svg?raw=true",
+		logo: "https://raw.githubusercontent.com/ImSkully/pm2-papertrail-logger/main/assets/Papertrail.svg",
 		theme: ["#6DA55F", "#ccc", "#3ff", "#3ff"],
 		el: { probes: false, actions: false },
 		block: { actions: true, issues: true, meta: true }
