@@ -1,12 +1,19 @@
-# PM2 Papertrail Logger
+# PM2 Papertrail Logger <a href="https://pm2.keymetrics.io" target="_blank" alt="pm2"><img src="https://img.shields.io/badge/pm2-2B037A.svg?logo=pm2" /></a> <a href="https://papertrailapp.com" target="_blank" alt="Papertrail"><img src="https://img.shields.io/badge/Papertrail-04498f.svg?logo=data:image/svg%2bxml;base64,PHN2ZyBoZWlnaHQ9IjI4IiB2aWV3Qm94PSIwIDAgMzUgMjgiIHdpZHRoPSIzNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJtMTYuNjYyIDEzLjEzLjAwMy4wMTdjLTEuNTkuNDItMy4xOTguNzcyLTQuNzc1IDEuMjU5YTIwLjk4IDIwLjk4IDAgMCAwIC0xMS44MTUtNS4yOCAzOC40MDUgMzguNDA1IDAgMCAxIDIyLjI4My03LjIxN2wtMi43NDggMi41MThzMTEuNjQ0LS40MTcgMTQuNTgtNC40MjdhNS4zNzcgNS4zNzcgMCAwIDEgLS4zNzggMS4yMTUgMTMuMTIgMTMuMTIgMCAwIDEgLTQuMjM4IDUuOTg1IDI0LjI2NSAyNC4yNjUgMCAwIDEgLTYuMDQyIDMuNDQxIDU3Ljg3NCA1Ny44NzQgMCAwIDEgLTYuNTY2IDIuNDA0bC0uMzA0LjA4NHptMTguMjYzLS4zOTZjLTQuMjIuNTg4LTEyLjM1MiA0Ljc2Mi0xOC4yMTggOC4wMzFhMjEuMTA1IDIxLjEwNSAwIDAgMCAtMy42ODQtNS4yNTdjMTEuMTU3LTMuNjEzIDIxLjkwMi0yLjc3NCAyMS45MDItMi43NzR6bS0xNy40ODQgOS43MDYgMTEuNTU2LTQuOTYtMTAuMjI3IDEwLjUyYTIwLjkzOCAyMC45MzggMCAwIDAgLTEuMzMtNS41NnoiIGZpbGw9IiNmZmExMDAiIGRhdGEtZGFya3JlYWRlci1pbmxpbmUtZmlsbD0iIiBzdHlsZT0iLS1kYXJrcmVhZGVyLWlubGluZS1maWxsOiAjY2M4MTAwOyI+PC9wYXRoPjwvc3ZnPg==" /></a>
+
 ![Maintained](https://img.shields.io/maintenance/yes/2023.svg)
 <a href="https://nodejs.org" target="_blank" alt="Node.js"><img src="https://img.shields.io/badge/Node.js-6DA55F?style=flat&logo=node.js&logoColor=white" /></a>
-<a href="https://papertrailapp.com" target="_blank" alt="Papertrail"><img src="https://img.shields.io/badge/Papertrail-04498f.svg?logo=data:image/svg%2bxml;base64,PHN2ZyBoZWlnaHQ9IjI4IiB2aWV3Qm94PSIwIDAgMzUgMjgiIHdpZHRoPSIzNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJtMTYuNjYyIDEzLjEzLjAwMy4wMTdjLTEuNTkuNDItMy4xOTguNzcyLTQuNzc1IDEuMjU5YTIwLjk4IDIwLjk4IDAgMCAwIC0xMS44MTUtNS4yOCAzOC40MDUgMzguNDA1IDAgMCAxIDIyLjI4My03LjIxN2wtMi43NDggMi41MThzMTEuNjQ0LS40MTcgMTQuNTgtNC40MjdhNS4zNzcgNS4zNzcgMCAwIDEgLS4zNzggMS4yMTUgMTMuMTIgMTMuMTIgMCAwIDEgLTQuMjM4IDUuOTg1IDI0LjI2NSAyNC4yNjUgMCAwIDEgLTYuMDQyIDMuNDQxIDU3Ljg3NCA1Ny44NzQgMCAwIDEgLTYuNTY2IDIuNDA0bC0uMzA0LjA4NHptMTguMjYzLS4zOTZjLTQuMjIuNTg4LTEyLjM1MiA0Ljc2Mi0xOC4yMTggOC4wMzFhMjEuMTA1IDIxLjEwNSAwIDAgMCAtMy42ODQtNS4yNTdjMTEuMTU3LTMuNjEzIDIxLjkwMi0yLjc3NCAyMS45MDItMi43NzR6bS0xNy40ODQgOS43MDYgMTEuNTU2LTQuOTYtMTAuMjI3IDEwLjUyYTIwLjkzOCAyMC45MzggMCAwIDAgLTEuMzMtNS41NnoiIGZpbGw9IiNmZmExMDAiIGRhdGEtZGFya3JlYWRlci1pbmxpbmUtZmlsbD0iIiBzdHlsZT0iLS1kYXJrcmVhZGVyLWlubGluZS1maWxsOiAjY2M4MTAwOyI+PC9wYXRoPjwvc3ZnPg==" /></a>
 ![License](https://img.shields.io/github/license/ImSkully/pm2-papertrail-logger)
 <a href="./package-lock.json" target="_blank" alt="package-lock"><img src="https://img.shields.io/badge/package--lock-committed-brightgreen" /></a>
-![Version](https://img.shields.io/npm/v/pm2-papertrail-logger.svg)
+<a href="https://www.npmjs.com/package/pm2-papertrail-logger" target="_blank" alt="npmjs Package"><img src="https://img.shields.io/npm/v/pm2-papertrail-logger.svg" /></a>
 
-A simple and efficient [PM2](https://pm2.keymetrics.io) module that forwards logs for all your PM2 processes to [Papertrail](https://papertrailapp.com).
+A simple and efficient [PM2](https://pm2.keymetrics.io) module that forwards logs for all your PM2 processes to [Papertrail](https://papertrailapp.com):
+
+* ⚡️ Fast and lightweight, unpacked size of 45kb!
+* 🔒 Secure with all logs sent over TLS
+* 🔧 Easy to install and configure, deployed with 3 easy commands within a matter of seconds!
+* 📝 Adjustable hostname for your pm2 source
+* 🚀 Supports all PM2 process modes, including cluster, fork, and standalone.
+* 📦 Memory management and automatic cleanup for closed processes
 
 # Prerequisites
 
@@ -36,6 +43,20 @@ Within your Papertrail account, you will need a [Log Destination](https://papert
 	```
 
 3. The module should restart and begin logging to Papertrail!
+
+# Usage
+Once the module is installed and configured, it will automatically begin logging all your PM2 processes to Papertrail. You can view the logs by clicking on the [`Events`](https://my.papertrailapp.com/events) tab within your Papertrail account.
+
+By default, the host name sent to Papertrail will be the OS hostname, you can change this by setting the hostname configuration variable:
+```bash
+pm2 set pm2-papertrail-logger:hostname <hostname>
+```
+
+### PM2 Metrics
+This module also provides metrics that can be viewed within the PM2 dashboard.
+| Metric | Description |
+| --- | --- |
+| `Attached Processes` | The number of processes that are currently attached to the module. |
 
 # Uninstalling
 To uninstall the module, simply run:
