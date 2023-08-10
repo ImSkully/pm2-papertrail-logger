@@ -1,4 +1,3 @@
-const os = require("os");
 const winston = require("winston");
 require("winston-papertrail").Papertrail;
 
@@ -28,6 +27,13 @@ class PapertrailLogger
 		});
 	}
 
+	/**
+	 * log(level, message)
+	 * Dispatches a log via transport pipeline to Papertrail.
+	 * 
+	 * @param {String} level 	The log level to use.
+	 * @param {String} message 	The message to log.
+	 */
 	log(level, message)
 	{
 		this.logger[level](message);
