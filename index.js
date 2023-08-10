@@ -39,6 +39,7 @@ function routeLog(packet, level = "info")
 /**
  * log(message, level = "info")
  * Logs a message to the console as this module.
+ * 
  * @param {String} 	message 	The message to log.
  * @param {String} 	level 		The log level to use.	[default: "info"]
  */
@@ -74,12 +75,12 @@ pmx.initModule({
 	// Check if the required configuration values are present.
 	if (!PM2_CONFIG.host || !PM2_CONFIG.port) {
 		return log(
-			"You are missing required configuration values!\n" +
-			"Please run the following commands to setup your Papertrail source:\n" +
-			"$ pm2 set " + PM2_CONFIG.module_name + ":host <host>\n" +
-			"$ pm2 set " + PM2_CONFIG.module_name + ":port <port>\n\n" +
-			"Optionally, you can also set the hostname to use for this source:\n" +
-			"$ pm2 set " + PM2_CONFIG.module_name + ":hostname <hostname>",
+			`You are missing required configuration values!\n` +
+			`Please run the following commands to setup your Papertrail source:\n` +
+			`$ pm2 set ${PM2_CONFIG.module_name}:host <host>\n` +
+			`$ pm2 set ${PM2_CONFIG.module_name}:port <port>\n\n` +
+			`Optionally, you can also set the hostname to use for this source:\n` +
+			`$ pm2 set ${PM2_CONFIG.module_name}:hostname <hostname>`,
 		"error");
 	}
 
@@ -92,8 +93,6 @@ pmx.initModule({
 
 		// Initialize a new pm2 bus to listen for log events.
 		pm2.launchBus(function(error, bus) {
-			//bus.on("log:PM2", function(packet) { log("info", "PM2", packet.data, packet); });
-
 			bus.on("log:out", (packet) => routeLog(packet, "info"));
 			bus.on("log:err", (packet) => routeLog(packet, "error"));
 
