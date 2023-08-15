@@ -1,7 +1,6 @@
 const os = require("os");
-const pm2 = require("pm2");
-const pmx = require("pmx");
 const io = require("@pm2/io");
+const pm2 = require("pm2");
 
 const PapertrailLogger = require("./PapertrailLogger.js");
 
@@ -12,7 +11,7 @@ const METRICS = {
 
 const TRANSPORTS = {}; // Transport pipelines for each process.
 let PM2_CONFIG = {}; // Module configuration.
-let IGNORED_PROCESSES = ["pm2-papertrail", "pm2-auto-pull"]; // Processes to ignore when logging.
+let IGNORED_PROCESSES = ["pm2-papertrail"]; // Processes to ignore when logging.
 
 /**
  * routeLog(packet, [level = "info"])
@@ -52,25 +51,15 @@ function log(message, level = "info")
 	return true;
 }
 
-// pm2 module configuration output.
-pmx.configureModule({
+// pm2 module configuration and initialization.
+io.init({
 	human_info: [
 		["Papertrail Host", PM2_CONFIG.host || "Not configured"],
 		["Papertrail Port", PM2_CONFIG.port || "Not configured"],
 		["Papertrail Hostname", PM2_CONFIG.hostname || os.hostname()]
 	]
-});
-
-// Initialize the pm2 module.
-pmx.initModule({
-	widget: {
-		logo: "https://raw.githubusercontent.com/ImSkully/pm2-papertrail-logger/main/assets/Papertrail.svg",
-		theme: ["#6DA55F", "#ccc", "#3ff", "#3ff"],
-		el: { probes: false, actions: false },
-		block: { actions: true, issues: true, meta: true }
-	}
-}, (error, config) => {
-	PM2_CONFIG = config;
+}).initModule({}, (error) => {
+	PM2_CONFIG = io.getConfig();
 
 	// Check if the required configuration values are present.
 	if (!PM2_CONFIG.host || !PM2_CONFIG.port) {
