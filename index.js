@@ -11,7 +11,7 @@ const METRICS = {
 
 const TRANSPORTS = {}; // Transport pipelines for each process.
 let PM2_CONFIG = {}; // Module configuration.
-let IGNORED_PROCESSES = ["pm2-papertrail"]; // Processes to ignore when logging.
+let IGNORED_PROCESSES = []; // Processes to ignore when logging.
 
 /**
  * routeLog(packet, [level = "info"])
@@ -27,9 +27,9 @@ function routeLog(packet, level = "info")
 
 	if (!TRANSPORTS[processName]) // Create a new transport pipeline for this process.
 	{
-		log(`Created new logger for process: ${processName}`);
 		TRANSPORTS[processName] = new PapertrailLogger(processName, PM2_CONFIG);
 		METRICS.processes.set(Object.keys(TRANSPORTS).length);
+		log(`Created new logger for process: ${processName}`);
 	}
 
 	return TRANSPORTS[processName].log(level, packet.data);
@@ -44,7 +44,7 @@ function routeLog(packet, level = "info")
  */
 function log(message, level = "info")
 {
-	const output = `[${(PM2_CONFIG?.module_name || "papertrail-logger")}]: ${message}`;
+	const output = `[${(PM2_CONFIG?.module_name || "pm2-papertrail-logger")}]: ${message}`;
 
 	if (level === "error") console.error(output);
 	else console.log(output);
@@ -54,9 +54,11 @@ function log(message, level = "info")
 // pm2 module configuration and initialization.
 io.init({
 	human_info: [
-		["Papertrail Host", PM2_CONFIG.host || "Not configured"],
-		["Papertrail Port", PM2_CONFIG.port || "Not configured"],
-		["Papertrail Hostname", PM2_CONFIG.hostname || os.hostname()]
+		["Papertrail Host", process.env.host || "Not configured"],
+		["Papertrail Port", process.env.port || "Not configured"],
+		["Papertrail Hostname", process.env.hostname || os.hostname()],
+		["Process as Systems", (process.env["process-as-systems"] == "true") ? "Enabled" : "Disabled"],
+		["Blacklisted Processes", (process.env["blacklist"]) ? process.env["blacklist"].split(",").map((processName) => processName.trim()).join(", ") : "None"],
 	]
 }).initModule({}, (error) => {
 	PM2_CONFIG = io.getConfig();
@@ -76,9 +78,15 @@ io.init({
 	// Prepare the hostname for this source.
 	PM2_CONFIG.hostname = (PM2_CONFIG.hostname) ? PM2_CONFIG.hostname.trim() : os.hostname();
 
+	// Add any blacklisted processes to the ignore list.
+	PM2_CONFIG.blacklist = (PM2_CONFIG.blacklist) ? PM2_CONFIG.blacklist.trim() : false;
+	if (PM2_CONFIG.blacklist)
+		IGNORED_PROCESSES = IGNORED_PROCESSES.concat(PM2_CONFIG.blacklist.split(",").map((processName) => processName.trim()));
+
 	// Connect to the running pm2 service.
 	pm2.connect(() => {
-		log(`Started and forwarding log outputs to ${PM2_CONFIG.host}:${PM2_CONFIG.port} as '${PM2_CONFIG.hostname}'!`);
+		log(`Started and forwarding log outputs to ${PM2_CONFIG.host}:${PM2_CONFIG.port} as ${(PM2_CONFIG["process-as-systems"]) ? "unique systems per process" : `system name '${PM2_CONFIG.hostname}'`}.`);
+		if (IGNORED_PROCESSES.length > 0) log(`Ignoring a total of ${IGNORED_PROCESSES.length} processes.`);
 
 		// Initialize a new pm2 bus to listen for log events.
 		pm2.launchBus(function(error, bus) {
@@ -114,5 +122,5 @@ io.action("show attached processes", async (callback) => {
 		console.log(`\t- ${processName}`);
 	}
 
-	callback({ success: true });
+	return callback({ success: true });
 });
