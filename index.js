@@ -100,3 +100,19 @@ io.init({
 		});
 	});
 });
+
+// Expose pm2 action to list attached processes.
+io.action("show attached processes", async (callback) => {
+	const total = Object.keys(TRANSPORTS).length;
+	if (total === 0) {
+		console.log("[Attached Processes] Found no attached processes, a process will be attached when it logs for the first time.");
+		return callback({ success: true });
+	}
+
+	console.log(`[Attached Processes] Showing ${total} attached processes:`);
+	for (const processName in TRANSPORTS) {
+		console.log(`\t- ${processName}`);
+	}
+
+	callback({ success: true });
+});
