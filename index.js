@@ -18,44 +18,33 @@ let IGNORED_PROCESSES = []; // Processes to ignore when logging.
  * Routes a log packet to the appropriate transport pipeline.
  * 
  * @param {Object} packet 	A packet of data from the pm2 bus.
- * @param {String} level 	The log level to use.					[default: "info"]
+ * @param {String} level 	The log level to use.				[default: "info"]
  */
 async function routeLog(packet, level = "info")
 {
 	const processName = packet.process.name.trim();
+	if ((processName === PM2_CONFIG.module_name) && level == "error") return; // Discard errors from this module to avoid recursion.
 	if (IGNORED_PROCESSES.includes(processName)) return; // Discard ignored processes.
 
 	if (!TRANSPORTS[processName]) // Create a new transport pipeline for this process.
 	{
-		let appName = processName; // If we are using process as systems, then we need to use the namespace as the app name.
-		if (PM2_CONFIG["process-as-systems"]) appName = await getProcessNamespace(packet.process.pm_id) || "default";
+		let systemName = PM2_CONFIG.hostname;
+		let appName = processName;
 
-		TRANSPORTS[processName] = new PapertrailLogger(processName, {
-			app_name: appName,
-			...PM2_CONFIG
-		});
+		// If we are using process as systems, the the system name is the process, and use the pm2 namespace as the app name.
+		if (PM2_CONFIG["process-as-systems"]) {
+			systemName = processName;
+			appName = await getProcessNamespace(packet.process.pm_id) || "default";
+		}
+
+		// Create a new logger for this process.
+		TRANSPORTS[processName] = new PapertrailLogger(systemName, appName);
 
 		METRICS.processes.set(Object.keys(TRANSPORTS).length);
-		log(`Created new logger for process: ${processName}`);
+		console.log(`Created new logger for process: ${processName}`);
 	}
 
 	return TRANSPORTS[processName].log(level, packet.data);
-}
-
-/**
- * log(message, level = "info")
- * Logs a message to the console as this module.
- * 
- * @param {String} 	message 	The message to log.
- * @param {String} 	level 		The log level to use.	[default: "info"]
- */
-function log(message, level = "info")
-{
-	const output = `[${(PM2_CONFIG?.module_name || "pm2-papertrail-logger")}]: ${message}`;
-
-	if (level === "error") console.error(output);
-	else console.log(output);
-	return true;
 }
 
 /**
@@ -89,14 +78,13 @@ io.init({
 
 	// Check if the required configuration values are present.
 	if (!PM2_CONFIG.host || !PM2_CONFIG.port) {
-		return log(
+		return console.error(
 			`You are missing required configuration values!\n` +
 			`Please run the following commands to setup your Papertrail source:\n` +
 			`$ pm2 set ${PM2_CONFIG.module_name}:host <host>\n` +
 			`$ pm2 set ${PM2_CONFIG.module_name}:port <port>\n\n` +
 			`Optionally, you can also set the hostname to use for this source:\n` +
-			`$ pm2 set ${PM2_CONFIG.module_name}:hostname <hostname>`,
-		"error");
+			`$ pm2 set ${PM2_CONFIG.module_name}:hostname <hostname>`);
 	}
 
 	// Prepare the hostname for this source.
@@ -109,8 +97,8 @@ io.init({
 
 	// Connect to the running pm2 service.
 	pm2.connect(() => {
-		log(`Started and forwarding log outputs to ${PM2_CONFIG.host}:${PM2_CONFIG.port} as ${(PM2_CONFIG["process-as-systems"]) ? "unique systems per process" : `system name '${PM2_CONFIG.hostname}'`}.`);
-		if (IGNORED_PROCESSES.length > 0) log(`Ignoring a total of ${IGNORED_PROCESSES.length} processes.`);
+		console.log(`Started and forwarding log outputs to ${PM2_CONFIG.host}:${PM2_CONFIG.port} as ${(PM2_CONFIG["process-as-systems"]) ? "unique systems per process" : `system name '${PM2_CONFIG.hostname}'`}.`);
+		if (IGNORED_PROCESSES.length > 0) console.log(`Ignoring a total of ${IGNORED_PROCESSES.length} processes.`);
 
 		// Initialize a new pm2 bus to listen for log events.
 		pm2.launchBus(function(error, bus) {
@@ -120,13 +108,11 @@ io.init({
 			// Cleanup log transport pipelines when a process exits.
 			bus.on("process:event", (packet) => {
 				if (packet.event === "exit" && TRANSPORTS[packet.process.name]) {
-
-					// Close the transport pipeline for this process and delete it.
-					TRANSPORTS[packet.process.name].close();
+					// Remove the log object for this process.
 					delete TRANSPORTS[packet.process.name];
 					METRICS.processes.set(Object.keys(TRANSPORTS).length);
 
-					log(`Closed transport pipeline for exitting process '${packet.process.name}'.`);
+					console.log(`Closed transport pipeline for exitting process '${packet.process.name}'.`);
 				}
 			});
 		});
