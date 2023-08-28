@@ -20,14 +20,21 @@ let IGNORED_PROCESSES = []; // Processes to ignore when logging.
  * @param {Object} packet 	A packet of data from the pm2 bus.
  * @param {String} level 	The log level to use.					[default: "info"]
  */
-function routeLog(packet, level = "info")
+async function routeLog(packet, level = "info")
 {
 	const processName = packet.process.name.trim();
 	if (IGNORED_PROCESSES.includes(processName)) return; // Discard ignored processes.
 
 	if (!TRANSPORTS[processName]) // Create a new transport pipeline for this process.
 	{
-		TRANSPORTS[processName] = new PapertrailLogger(processName, PM2_CONFIG);
+		let appName = processName; // If we are using process as systems, then we need to use the namespace as the app name.
+		if (PM2_CONFIG["process-as-systems"]) appName = await getProcessNamespace(packet.process.pm_id) || "default";
+
+		TRANSPORTS[processName] = new PapertrailLogger(processName, {
+			app_name: appName,
+			...PM2_CONFIG
+		});
+
 		METRICS.processes.set(Object.keys(TRANSPORTS).length);
 		log(`Created new logger for process: ${processName}`);
 	}
@@ -51,6 +58,23 @@ function log(message, level = "info")
 	return true;
 }
 
+/**
+ * getProcessNamespace(processIdentifier)
+ * Gets the namespace for a pm2 process.
+ * 
+ * @param 	{string|int} 	processIdentifier 	The pm2 process identifier.
+ * @returns	{Promise<string|false>}				A promise that resolves to the namespace or false if it could not be resolved.
+ */
+async function getProcessNamespace(processIdentifier)
+{
+	return new Promise((resolve, reject) => {
+		pm2.describe(processIdentifier, (error, process) => {
+			if (error) return reject(false);
+			return resolve(process[0]?.pm2_env?.namespace);
+		});
+	});
+}
+
 // pm2 module configuration and initialization.
 io.init({
 	human_info: [
@@ -60,7 +84,7 @@ io.init({
 		["Process as Systems", (process.env["process-as-systems"] == "true") ? "Enabled" : "Disabled"],
 		["Blacklisted Processes", (process.env["blacklist"]) ? process.env["blacklist"].split(",").map((processName) => processName.trim()).join(", ") : "None"],
 	]
-}).initModule({}, (error) => {
+}).initModule(false, (error) => {
 	PM2_CONFIG = io.getConfig();
 
 	// Check if the required configuration values are present.

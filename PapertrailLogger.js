@@ -48,7 +48,7 @@ function getLoggerTransport(config, name)
 				host: config.host,
 				port: config.port,
 				localhost: name,
-				app_name: "app",
+				app_name: config.app_name,
 				protocol: "tls4",
 				eol: "\n",
 				format: winston.format.combine(
