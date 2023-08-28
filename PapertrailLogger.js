@@ -1,78 +1,40 @@
+const os = require("os");
 const winston = require("winston");
 require("winston-syslog");
 
-let PAPERTRAIL_TRANSPORT;
+// Create a new syslog transport with the configured Papertrial log destination.
+const PAPERTRAIL_SYSTEM_TRANSPORT = new winston.transports.Syslog({
+	host: process.env.host,
+	port: process.env.port,
+	localhost: process.env.hostname || os.hostname(),
+	app_name: process.env.module_name || "pm2-papertrail-logger",
+	protocol: "tls4",
+	eol: "\n"
+});
 
-/**
- * getLoggerTransport(config, name)
- * Creates a new logger transport for the given process name and configuration.
- * 
- * @param 	{String} 			name 	The name of the process to create a logger for.
- * @param 	{Object} 			config 	The pm2 module configuration containing Papertrail log destination settings.
- * 
- * @returns {winston.Logger} 			The logger transport instance to use.
- */
-function getLoggerTransport(config, name)
-{
-	// If the configuration is set to use one shared system transport.
-	if (!config["process-as-systems"])
-	{
-		if (!PAPERTRAIL_TRANSPORT) {
-			PAPERTRAIL_TRANSPORT = new winston.transports.Syslog({
-				host: config.host,
-				port: config.port,
-				localhost: config.hostname,
-				app_name: name,
-				protocol: "tls4",
-				eol: "\n",
-				format: winston.format.combine( // Enable log message coloring.
-					winston.format.colorize(),
-					winston.format.simple()
-				)
-			});
-		}
+// The winson logger to use for forwarding logs.
+const PAPERTRAIL_LOGGER = winston.createLogger({
+	format: winston.format.printf(({message}) => { return message }),
+	levels: winston.config.syslog.levels, // Use all syslog procotol levels.
+	transports: [ PAPERTRAIL_SYSTEM_TRANSPORT ],
+});
 
-		return winston.createLogger({
-			format: winston.format.simple(),
-			levels: winston.config.syslog.levels,
-			transports: [ PAPERTRAIL_TRANSPORT ],
-		});
-	}
-
-	// Use a new transport for this process.
-	return winston.createLogger({
-		format: winston.format.simple(),
-		levels: winston.config.syslog.levels,
-		transports: [
-			new winston.transports.Syslog({
-				host: config.host,
-				port: config.port,
-				localhost: name,
-				app_name: config.app_name,
-				protocol: "tls4",
-				eol: "\n",
-				format: winston.format.combine(
-					winston.format.colorize(),
-					winston.format.simple()
-				)
-			})
-		]
-	});
-}
+const PROCESS_AS_SYSTEM = (process.env?.["process-as-systems"]?.toLowerCase() === "true");
 
 class PapertrailLogger
 {
 	/**
-	 * PapertrailLogger(name, config)
-	 * Creates a new PapertrailLogger instance.
+	 * PapertrailLogger(systemName, programName)
+	 * Creates a new Papertrail logger instance for a process.
 	 * 
-	 * @param {String} name 	The name of the process to create a logger for.
-	 * @param {Object} config 	The pm2 module configuration containing Papertrail log destination settings.
+	* @param 	{String} systemName 	The name of the system to log as.
+	 * @param 	{String} programName	The program name to log as.
 	 */
-	constructor(name, config)
+	constructor(systemName, programName)
 	{
-		this.name = name;
-		this.logger = getLoggerTransport(config, name);
+		this.name = systemName;
+		this.appName = programName;
+		this.process = (PROCESS_AS_SYSTEM) ? systemName : programName; // The name of the process for internal logging.
 	}
 
 	/**
@@ -85,20 +47,17 @@ class PapertrailLogger
 	log(level, message)
 	{
 		try {
-			this.logger[level](message);
+			if (!PAPERTRAIL_SYSTEM_TRANSPORT || !PAPERTRAIL_LOGGER)
+				return console.error(`Discarding log from '${this.process}' as Papertrail transport is not ready.`);
+
+			// Update the transport to use details of this process.
+			PAPERTRAIL_SYSTEM_TRANSPORT.localhost = this.name;
+			PAPERTRAIL_SYSTEM_TRANSPORT.appName = this.appName;
+			PAPERTRAIL_LOGGER[level](message);
 		} catch (error) {
-			console.error(`[ERROR] Failed to log message to Papertrail for process '${this.name}' with level ${level}:`);
+			console.error(`[ERROR] Failed to log message to Papertrail for process '${this.process}' with level ${level}:`);
 			console.error(error);
 		}
-	}
-
-	/**
-	 * close()
-	 * Closes the logger and all log transports.
-	 */
-	close()
-	{
-		this.logger.close();
 	}
 }
 
