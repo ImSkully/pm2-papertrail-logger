@@ -8,7 +8,7 @@
 
 A simple and efficient [PM2](https://pm2.keymetrics.io) module that forwards logs for all your PM2 processes to [Papertrail](https://papertrailapp.com):
 
-* ⚡️ Fast and lightweight, unpacked size of 45kb!
+* ⚡️ Fast and lightweight, unpacked size of 54kb!
 * 🔒 Secure with all logs sent over TLS
 * 🔧 Easy to install and configure, deployed with 3 easy commands within a matter of seconds!
 * 📝 Adjustable hostname for your pm2 source
@@ -47,9 +47,22 @@ Within your Papertrail account, you will need a [Log Destination](https://papert
 # Usage
 Once the module is installed and configured, it will automatically begin logging all your PM2 processes to Papertrail. You can view the logs by clicking on the [`Events`](https://my.papertrailapp.com/events) tab within your Papertrail account.
 
+### Change Hostname
 By default, the host name sent to Papertrail will be the OS hostname, you can change this by setting the hostname configuration variable:
 ```bash
 pm2 set pm2-papertrail-logger:hostname <hostname>
+```
+
+### Process as Systems
+If you would like to have each PM2 process be created as its own system group within Papertrail, you can set the `process-as-systems` configuration to `true`:
+```bash
+pm2 set pm2-papertrail-logger:process-as-systems true
+```
+
+### Blacklist
+To prevent certain PM2 processes from being logged to Papertrail, you can set a blacklist of process names in the `blacklist` configuration variable which is a comma-separated list of process names:
+```bash
+pm2 set pm2-papertrail-logger:blacklist "process1,process2"
 ```
 
 ### PM2 Metrics
